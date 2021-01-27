@@ -82,9 +82,9 @@ def get_help_msg(help_msg: str = '>>>Click to get help message<<<'):
     return RText(help_msg).c(RAction.run_command, '!!help').h('!!help')
 
 
-def get_bullshit(server: ServerInterface):
+def get_bullshit(server: ServerInterface, config: dict):
     bullshit = server.get_plugin_instance('bullshit_generator_api')
-    return bullshit.generate()
+    return bullshit.generate(config['bullshit_keys'], 10)
 
 
 def get_sub_servers(sub_servers: dict):
@@ -120,7 +120,7 @@ def format_output(server: ServerInterface, player: str):
         output.append(get_seed(server), '\n')
     output.append('\n')
     if config['show_bullshit']:
-        output.append(get_bullshit(server), '\n\n')
+        output.append(get_bullshit(server, config), '\n\n')
     if config['show_servers']:
         output.append(get_sub_servers(config['servers']), '\n')
     if config['show_help']:
