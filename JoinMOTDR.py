@@ -32,6 +32,14 @@ show_daycount: false
 show_seed: false
 show_help: true
 help_message: "§7>>> Click for help message <<<§r"
+show_bullshit: false
+bullshit_keys:
+- §9开服§r
+- §6写插件§r
+- §a玩生电§r
+- §e搞红石§r
+- §c搓机器§r
+- §l§krua§r
 show_servers: false
 servers:
   survival:
@@ -74,8 +82,13 @@ def get_help_msg(help_msg: str = '>>>Click to get help message<<<'):
     return RText(help_msg).c(RAction.run_command, '!!help').h('!!help')
 
 
+def get_bullshit(server: ServerInterface):
+    bullshit = server.get_plugin_instance('bullshit_generator_api')
+    return bullshit.generate()
+
+
 def get_sub_servers(sub_servers: dict):
-    sub_server_list = []
+    sub_server_list = list()
     for item in sub_servers:
         if sub_servers[item].get('current', False):
             sub_server_list.append(RTextList(
@@ -95,26 +108,24 @@ def get_sub_servers(sub_servers: dict):
     return RTextList(*sub_server_list)
 
 
-def format_reply_msg(server: ServerInterface, player: str):
+def format_output(server: ServerInterface, player: str):
     config = get_config(server)
-    output = [
+    output = RTextList(
         f'{"-" * 8}JoinMOTDR v{VERSION}{"-" * 8}\n\n',
         RText(config["welcome_message"].format(player_name=player)), '\n'
-    ]
+    )
     if config['show_daycount']:
-        output.append(get_day_count(server))
-        output.append('\n')
+        output.append(get_day_count(server), '\n')
     if config['show_seed']:
-        output.append(get_seed(server))
-        output.append('\n')
+        output.append(get_seed(server), '\n')
     output.append('\n')
+    if config['show_bullshit']:
+        output.append(get_bullshit(server), '\n\n')
     if config['show_servers']:
-        output.append(get_sub_servers(config['servers']))
-        output.append('\n')
+        output.append(get_sub_servers(config['servers']), '\n')
     if config['show_help']:
-        output.append(get_help_msg(config["help_message"]))
-        output.append('\n')
-    return RTextList(*output)
+        output.append(get_help_msg(config["help_message"]), '\n')
+    return output
 
 
 def player_is_real(server: ServerInterface, player: str):
@@ -143,7 +154,7 @@ def player_is_real(server: ServerInterface, player: str):
 
 def on_player_joined(server: ServerInterface, player: str, info: Info):
     if player_is_real(server, player):
-        server.tell(player, format_reply_msg(server, player))
+        server.tell(player, format_output(server, player))
         server.logger.info(f'Succeeded to send MOTD to {player}')
     else:
         server.logger.info(f'Sent nothing because player {player} is bot')
