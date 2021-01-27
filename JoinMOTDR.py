@@ -13,9 +13,10 @@ PLUGIN_METADATA = {
     'description': '',
     'author': [
         'Van_Involution',  # Reforged to fit MCDR 1.x
-        'Alex3236'  # Source of inspiration
+        'Alex3236',  # Source of inspiration
+        'Fallen_Breath'  # Another source of inspiration
     ],
-    'link': 'https://github.com/Van-Involution/MCDR-Plugins',
+    'link': 'https://github.com/Van-Involution/JoinMOTDR',
     'dependencies': {
         'mcdreforged': '>=1.0.0'
     }
@@ -61,7 +62,7 @@ def get_config(server: ServerInterface):
 
 def get_day_count(server: ServerInterface):
     day_count_r = server.get_plugin_instance('day_count_reforged')
-    return day_count_r.format_reply_msg(server)
+    return day_count_r.get_day_count(server)
 
 
 def get_seed(server: ServerInterface):
@@ -96,24 +97,24 @@ def get_sub_servers(sub_servers: dict):
 
 def format_reply_msg(server: ServerInterface, player: str):
     config = get_config(server)
-    reply_msg_list = [
+    output = [
         f'{"-" * 8}JoinMOTDR v{VERSION}{"-" * 8}\n\n',
         RText(config["welcome_message"].format(player_name=player)), '\n'
     ]
     if config['show_daycount']:
-        reply_msg_list.append(get_day_count(server))
-        reply_msg_list.append('\n')
+        output.append(get_day_count(server))
+        output.append('\n')
     if config['show_seed']:
-        reply_msg_list.append(get_seed(server))
-        reply_msg_list.append('\n')
-    reply_msg_list.append('\n')
+        output.append(get_seed(server))
+        output.append('\n')
+    output.append('\n')
     if config['show_servers']:
-        reply_msg_list.append(get_sub_servers(config['servers']))
-        reply_msg_list.append('\n')
+        output.append(get_sub_servers(config['servers']))
+        output.append('\n')
     if config['show_help']:
-        reply_msg_list.append(get_help_msg(config["help_message"]))
-        reply_msg_list.append('\n')
-    return RTextList(*reply_msg_list)
+        output.append(get_help_msg(config["help_message"]))
+        output.append('\n')
+    return RTextList(*output)
 
 
 def player_is_real(server: ServerInterface, player: str):
