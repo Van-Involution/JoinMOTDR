@@ -26,22 +26,30 @@ ID = PLUGIN_METADATA['id']
 NAME = PLUGIN_METADATA['name']
 VERSION = PLUGIN_METADATA['version']
 DEFAULT_CONFIG_PATH = f'config/{NAME}.yml'
-DEFAULT_CONFIG = '''# Configure file for DayCountR
+DEFAULT_CONFIG = '''# Configure file for JoinMOTDR
+# Check https://github.com/Van-Involution/JoinMOTDR for detail
 
+# Basic settings
 welcome_message: Welcome, §6{player_name}§r!  # Use {player_name} as format key, support RText
-show_daycount: false  # Requires DayCountR (https://github.com/Van-Involution/DayCountR)
-show_seed: false  # Requires SeedR (https://github.com/Van-Involution/SeedR)
 show_help: true
 help_message: "§7>>> Click for help message <<<§r"  # Support RText
-show_bullshit: false  # Requires BullshitGenAPI (https://github.com/Van-Involution/BullshitGenAPI)
+
+# MCDR plugin requires
+show_daycount: false  # Requires plugin DayCountR (https://github.com/Van-Involution/DayCountR)
+show_seed: false  # Requires plugin SeedR (https://github.com/Van-Involution/SeedR)
+show_bullshit: false  # Requires plugin BullshitGenAPI (https://github.com/Van-Involution/BullshitGenAPI)
 bullshit_keys:  # Support RText
 - §ktest§r
-bots:  # For fake player detect
+
+# Other API requires
+bots:  # For fake player detection
   prefix: #bot_
   suffix: #_fake
-show_servers: false  # For sub-server of server-group
-servers:  # Use format as the first object
-  survival:  # Server ID, use in command /server
+show_request_text: false  # Requires package Requests (https://pypi.org/project/requests/), use command "pip install requests" to install
+request_api_source: https://v1.hitokoto.cn/?encode=text  # Make sure the return is plain text
+show_server_list: false  # For sub-server of server-group
+server_list:  # Use format as the first object
+  survival:  # Server ID, be used in command "/server <server_id>"
     name: Survival  # Displayed server name
     motd: You are now in server §a§l{server_name}§r  # Use {server_name} as format key, support RText
     current: true  # Optional, for server in the same directory
@@ -95,7 +103,7 @@ def get_bullshit(server: ServerInterface, config: dict, plugin_id: str = 'bullsh
         return None
 
 
-def get_sub_servers(server: ServerInterface, sub_servers: dict):
+def get_server_list(server: ServerInterface, sub_servers: dict):
     try:
         sub_server_list = RTextList()
         for item in sub_servers:
@@ -152,9 +160,9 @@ def format_output(server: ServerInterface, player: str, cfg: dict):
         else:
             server.logger.warning('Failed to add "bullshit" to MOTD')
             error |= 0b1
-    if cfg.get('show_servers', False):
-        if (sub_servers := get_sub_servers(server, cfg.get('servers', None))) is not None:
-            output.append(sub_servers, '\n')
+    if cfg.get('show_server_list', False):
+        if (server_list := get_server_list(server, cfg.get('server_list', None))) is not None:
+            output.append(server_list, '\n')
         else:
             server.logger.warning('Failed to add "server_list" to MOTD')
             error |= 0b1
