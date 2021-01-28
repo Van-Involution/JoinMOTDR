@@ -156,7 +156,7 @@ def get_server_list(server: ServerInterface, sub_servers: dict):
 def format_output(server: ServerInterface, player: str, cfg: dict):
     error = 0b0
     output = RTextList(
-        f' {"-" * 8}JoinMOTDR v{VERSION}{"-" * 8}\n\n',
+        f'{"-" * 8}JoinMOTDR v{VERSION}{"-" * 8}\n\n',
         cfg.get('welcome_message', 'Welcome, §6{player_name}§r!').format(player_name=player),
         '\n'
     )
