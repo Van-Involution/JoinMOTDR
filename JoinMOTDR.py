@@ -210,7 +210,7 @@ def player_is_real(server: ServerInterface, player: str, bots: dict):
         bot_pattern = r'^' + prefix + r'.+' + suffix + r'$'
         return not bool(re.match(bot_pattern, player))
     else:
-        server.logger.debug(f'Cannot determine whatever player {player} is bot')
+        server.logger.info(f'Cannot determine whatever player {player} is bot, still sent MOTD!')
         return True
 
 
