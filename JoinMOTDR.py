@@ -46,7 +46,8 @@ bots:  # For fake player detection
   prefix: #bot_
   suffix: #_fake
 show_request_text: false  # Requires package Requests (https://pypi.org/project/requests/), use command "pip install requests" to install
-request_api_source: https://v1.hitokoto.cn/?encode=text  # Make sure the return is plain text
+request_api_list:  # Make sure the return is plain text
+  §bHitokoto§r: https://v1.hitokoto.cn/?encode=text
 show_server_list: false  # For sub-server of server-group
 server_list:  # Use format as the first object
   survival:  # Server ID, be used in command "/server <server_id>"
@@ -87,12 +88,22 @@ def get_seed(server: ServerInterface, plugin_id: str = 'seed_reforged'):
         return None
 
 
-def get_help_msg(server: ServerInterface, help_msg: str):
+def get_request_text(server: ServerInterface, config: dict):
     try:
-        return RText(help_msg).c(RAction.run_command, '!!help').h('!!help')
+        import requests
     except Exception:
-        server.logger.warning(f'Failed to get config of plugin "{ID}"')
+        server.logger.warning('Failed to import package Requests, if it\'s not installed, use command "pip install requests" to install')
         return None
+    text = RTextList()
+    for item, url in config.get('request_api_list', dict()).items():
+        try:
+            text.append(
+                '[', RText(item).h(f'§lAPI§r: §n{url}§r').c(RAction.open_url, url), '] ',
+                requests.get(url).text, '\n'
+            )
+        except Exception:
+            server.logger.warning(f'Failed to get text from {url}')
+    return text
 
 
 def get_bullshit(server: ServerInterface, config: dict, plugin_id: str = 'bullshit_generator_api'):
@@ -103,16 +114,24 @@ def get_bullshit(server: ServerInterface, config: dict, plugin_id: str = 'bullsh
         return None
 
 
+def get_help_msg(server: ServerInterface, help_msg: str):
+    try:
+        return RText(help_msg).c(RAction.run_command, '!!help').h('!!help')
+    except Exception:
+        server.logger.warning(f'Failed to get config of plugin "{ID}"')
+        return None
+
+
 def get_server_list(server: ServerInterface, sub_servers: dict):
     try:
         sub_server_list = RTextList()
-        for item in sub_servers:
-            if sub_servers[item].get('current', False):
+        for key_id, val_server in sub_servers.items():
+            if val_server.get('current', False):
                 sub_server_list.append(
                     '[',
-                    RText(name := sub_servers[item].get('name', item), RColor.red, RStyle.bold)
+                    RText(name := val_server.get('name', key_id), RColor.red, RStyle.bold)
                     .h(RText(
-                        sub_servers[item].get('motd', 'You are now in server §a§l{server_name}§r')
+                        val_server.get('motd', 'You are now in server §a§l{server_name}§r')
                         .format(server_name=name)
                     )),
                     '] '
@@ -120,12 +139,12 @@ def get_server_list(server: ServerInterface, sub_servers: dict):
             else:
                 sub_server_list.append(
                     '[',
-                    RText(name := sub_servers[item].get('name', item), RColor.gold)
+                    RText(name := val_server.get('name', key_id), RColor.gold)
                     .h(RText(
-                        sub_servers[item].get('motd', 'Click to join server §b{server_name}§r')
+                        val_server.get('motd', 'Click to join server §b{server_name}§r')
                         .format(server_name=name)
                     ))
-                    .c(RAction.run_command, f'/server {item}'),
+                    .c(RAction.run_command, f'/server {key_id}'),
                     '] '
                 )
         return sub_server_list
@@ -137,7 +156,7 @@ def get_server_list(server: ServerInterface, sub_servers: dict):
 def format_output(server: ServerInterface, player: str, cfg: dict):
     error = 0b0
     output = RTextList(
-        f'{"-" * 8}JoinMOTDR v{VERSION}{"-" * 8}\n\n',
+        f' {"-" * 8}JoinMOTDR v{VERSION}{"-" * 8}\n\n',
         cfg.get('welcome_message', 'Welcome, §6{player_name}§r!').format(player_name=player),
         '\n'
     )
@@ -154,12 +173,19 @@ def format_output(server: ServerInterface, player: str, cfg: dict):
             server.logger.warning('Failed to add "seed" to MOTD')
             error |= 0b1
     output.append('\n')
+    if cfg.get('show_request_text', False):
+        if (request_text := get_request_text(server, cfg)) is not None:
+            output.append(request_text)
+        else:
+            server.logger.warning('Failed to add "request_text" to MOTD')
+            error |= 0b1
     if cfg.get('show_bullshit', False):
         if (bullshit := get_bullshit(server, cfg)) is not None:
-            output.append(bullshit, '\n\n')
+            output.append(bullshit, '\n')
         else:
             server.logger.warning('Failed to add "bullshit" to MOTD')
             error |= 0b1
+    output.append('\n')
     if cfg.get('show_server_list', False):
         if (server_list := get_server_list(server, cfg.get('server_list', None))) is not None:
             output.append(server_list, '\n')
@@ -184,7 +210,7 @@ def player_is_real(server: ServerInterface, player: str, bots: dict):
         bot_pattern = r'^' + prefix + r'.+' + suffix + r'$'
         return not bool(re.match(bot_pattern, player))
     else:
-        server.logger.info(f'Cannot determine whatever player {player} is bot')
+        server.logger.debug(f'Cannot determine whatever player {player} is bot')
         return True
 
 
