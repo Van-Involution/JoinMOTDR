@@ -1,10 +1,10 @@
 # -*- coding: UTF-8 -*-
 
-import re
-from yaml import load, FullLoader
+from re import match
 from pathlib import Path
 
-from mcdreforged.api.all import *
+from mcdreforged.api.types import ServerInterface, Info
+from mcdreforged.api.rtext import RText, RTextTranslation, RTextList, RAction
 
 PLUGIN_METADATA = {
     'id': 'join_motd_reforged',
@@ -47,36 +47,51 @@ bots:  # For fake player detection
   suffix: #_fake
 show_request_text: false  # Requires package Requests (https://pypi.org/project/requests/), use command "pip install requests" to install
 request_api_list:  # Make sure the return is plain text
-  §bHitokoto§r: https://v1.hitokoto.cn/?encode=text
+  §d§lPoetry§r:  # 
+    url: https://api.muxiaoguo.cn/api/Gushici  # 
+    path: data/Poetry  # 
+  §6§liCiBa§r:
+    url: http://open.iciba.com/dsapi
+    path: content
+  §b§lHitokoto§r:
+    url: https://v1.hitokoto.cn/?encode=text
 show_server_list: false  # For sub-server of server-group
 server_list:  # Use format as the first object
   survival:  # Server ID, be used in command "/server <server_id>"
-    name: Survival  # Displayed server name
-    motd: You are now in server §a§l{server_name}§r  # Use {server_name} as format key, support RText
+    name: §c§l§nSurvival§r  # Displayed server name
+    motd: You are now in server {server_name}  # Use {server_name} as format key, support RText
     current: true  # Optional, for server in the same directory
   creative:
-    name: Creative
-    motd: Click to join server §b{server_name}§r
+    name: §6Creative§r
+    motd: Click to join server {server_name}
   mirror:
-    name: Mirror
-    motd: Click to join server §b{server_name}§r
+    name: §6Mirror§r
+    motd: Click to join server {server_name}
 '''
+
+error = 0b0
 
 
 def get_config(server: ServerInterface):
-    if not Path(DEFAULT_CONFIG_PATH).is_file():
-        server.logger.info('Fail to read config file, using default value')
-        with open(file=DEFAULT_CONFIG_PATH, mode='w') as cfg_0:
-            cfg_0.write(DEFAULT_CONFIG)
-    with open(file=DEFAULT_CONFIG_PATH, mode='r') as cfg:
-        return load(stream=cfg, Loader=FullLoader)
+    try:
+        from yaml import load, FullLoader
+    except Exception:
+        server.logger.warning('Failed to import package PyYAML (https://pypi.org/project/PyYAML), install it by command "pip install PyYAML"')
+        return None
+    else:
+        if not Path(DEFAULT_CONFIG_PATH).is_file():
+            server.logger.info('Fail to read config file, using default value')
+            with open(DEFAULT_CONFIG_PATH, 'w') as cfg_0:
+                cfg_0.write(DEFAULT_CONFIG)
+        with open(DEFAULT_CONFIG_PATH, 'r') as cfg:
+            return load(cfg, FullLoader)
 
 
 def get_day_count(server: ServerInterface, plugin_id: str = 'day_count_reforged'):
     try:
         return server.get_plugin_instance(plugin_id).get_day_count(server)
     except Exception:
-        server.logger.warning(f'Failed to get data of plugin "{plugin_id}"')
+        server.logger.warning(f'Failed to get data from plugin "{plugin_id}"')
         return None
 
 
@@ -84,39 +99,56 @@ def get_seed(server: ServerInterface, plugin_id: str = 'seed_reforged'):
     try:
         return server.get_plugin_instance(plugin_id).get_seed(server)
     except Exception:
-        server.logger.warning(f'Failed to get data of plugin "{plugin_id}"')
+        server.logger.warning(f'Failed to get data from plugin "{plugin_id}"')
         return None
 
 
 def get_request_text(server: ServerInterface, config: dict):
+    from json import loads
+    global error
     try:
         import requests
     except Exception:
         server.logger.warning('Failed to import package Requests, if it\'s not installed, use command "pip install requests" to install')
+        error |= 0b1
         return None
     text = RTextList()
-    for key_name, val_url in config.get('request_api_list', dict()).items():
+    for key_name, val_cfg in config.get('request_api_list', dict()).items():
+        val_url = val_cfg.get('url', key_name)
         try:
+            req_str = requests.get(val_url).text.strip()
+            if (path := val_cfg.get('path', None)) is not None:
+                req_json: dict = loads(req_str)
+                path_list = path.split('/')
+                for item in path_list:
+                    req_json = req_json.get(item, dict())
+                req_str = str(req_json).strip()
             text.append(
-                '[', RText(key_name).h(f'§lAPI§r: §n{val_url}§r').c(RAction.open_url, val_url), '] ',
-                requests.get(val_url).text, '\n'
+                rtext_name := RTextList(
+                    '[', RText(key_name).h(f'§lAPI§r: §n{val_url}§r').c(RAction.open_url, val_url), '] '
+                ),
+                RText(req_str)
+                .h(RTextList(rtext_name.to_plain_text(), RTextTranslation('chat.copy.click')))
+                .c(RAction.copy_to_clipboard, req_str),
+                '\n'
             )
         except Exception:
             server.logger.warning(f'Failed to get text from {val_url}')
+            error |= 0b1
     return text
 
 
 def get_bullshit(server: ServerInterface, config: dict, plugin_id: str = 'bullshit_generator_api'):
     try:
-        return server.get_plugin_instance(plugin_id).generate(config.get('bullshit_keys', '§ktest§r'), 160)
+        return server.get_plugin_instance(plugin_id).generate(config.get('bullshit_keys', '§ktest§r'), 120)
     except Exception:
-        server.logger.warning(f'Failed to get data of plugin "{plugin_id}"')
+        server.logger.warning(f'Failed to get data from plugin "{plugin_id}"')
         return None
 
 
 def get_help_msg(server: ServerInterface, help_msg: str):
     try:
-        return RText(help_msg).c(RAction.run_command, '!!help').h('!!help')
+        return RText(help_msg).c(RAction.run_command, '!!help').h('§n!!help§r')
     except Exception:
         server.logger.warning(f'Failed to get config of plugin "{ID}"')
         return None
@@ -129,20 +161,20 @@ def get_server_list(server: ServerInterface, sub_servers: dict):
             if val_server.get('current', False):
                 sub_server_list.append(
                     '[',
-                    RText(name := val_server.get('name', key_id), RColor.red, RStyle.bold)
+                    RText(name := val_server.get('name', key_id))
                     .h(RText(
                         val_server.get('motd', 'You are now in server §a§l{server_name}§r')
-                        .format(server_name=name)
+                        .format(server_name=RText(name))
                     )),
                     '] '
                 )
             else:
                 sub_server_list.append(
                     '[',
-                    RText(name := val_server.get('name', key_id), RColor.gold)
+                    RText(name := val_server.get('name', key_id))
                     .h(RText(
                         val_server.get('motd', 'Click to join server §b{server_name}§r')
-                        .format(server_name=name)
+                        .format(server_name=RText(name))
                     ))
                     .c(RAction.run_command, f'/server {key_id}'),
                     '] '
@@ -154,6 +186,7 @@ def get_server_list(server: ServerInterface, sub_servers: dict):
 
 
 def format_output(server: ServerInterface, player: str, cfg: dict):
+    global error
     error = 0b0
     output = RTextList(
         f'{"-" * 8}JoinMOTDR v{VERSION}{"-" * 8}\n\n',
@@ -199,7 +232,7 @@ def format_output(server: ServerInterface, player: str, cfg: dict):
             server.logger.warning('Failed to add "help_message" to MOTD')
             error |= 0b1
     if bool(error):
-        output.append(f'§cSomething of {NAME} is going wrong, please let admins look up the console!§r')
+        output.append(f'§cSomething of plugin {NAME} is going wrong, please let admins look up the console!§r')
     return output
 
 
@@ -208,16 +241,18 @@ def player_is_real(server: ServerInterface, player: str, bots: dict):
     prefix, suffix = xstr(bots.get('prefix', None)), xstr(bots.get('suffix', None))
     if bool(prefix) or bool(suffix):
         bot_pattern = r'^' + prefix + r'.+' + suffix + r'$'
-        return not bool(re.match(bot_pattern, player))
+        return not bool(match(bot_pattern, player))
     else:
         server.logger.info(f'Cannot determine whatever player {player} is bot, still sent MOTD!')
         return True
 
 
 def on_player_joined(server: ServerInterface, player: str, info: Info):
-    config = get_config(server)
-    if player_is_real(server, player, config.get('bots', dict())):
-        server.tell(player, format_output(server, player, config))
-        server.logger.info(f'Succeeded to send MOTD to {player}')
+    if (config := get_config(server)) is not None:
+        if player_is_real(server, player, config.get('bots', dict())):
+            server.tell(player, format_output(server, player, config))
+            server.logger.info(f'Succeeded to send MOTD to {player}')
+        else:
+            server.logger.info(f'Sent nothing because player {player} is bot')
     else:
-        server.logger.info(f'Sent nothing because player {player} is bot')
+        server.tell(player, f'§cSomething of plugin {NAME} is going wrong, please let admins look up the console!§r')
