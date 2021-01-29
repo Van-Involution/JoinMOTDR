@@ -95,14 +95,14 @@ def get_request_text(server: ServerInterface, config: dict):
         server.logger.warning('Failed to import package Requests, if it\'s not installed, use command "pip install requests" to install')
         return None
     text = RTextList()
-    for item, url in config.get('request_api_list', dict()).items():
+    for key_name, val_url in config.get('request_api_list', dict()).items():
         try:
             text.append(
-                '[', RText(item).h(f'§lAPI§r: §n{url}§r').c(RAction.open_url, url), '] ',
-                requests.get(url).text, '\n'
+                '[', RText(key_name).h(f'§lAPI§r: §n{val_url}§r').c(RAction.open_url, val_url), '] ',
+                requests.get(val_url).text, '\n'
             )
         except Exception:
-            server.logger.warning(f'Failed to get text from {url}')
+            server.logger.warning(f'Failed to get text from {val_url}')
     return text
 
 
