@@ -140,7 +140,7 @@ def get_request_text(server: ServerInterface, config: dict):
 
 def get_bullshit(server: ServerInterface, config: dict, plugin_id: str = 'bullshit_generator_api'):
     try:
-        return server.get_plugin_instance(plugin_id).generate(config.get('bullshit_keys', '§ktest§r'), 120)
+        return server.get_plugin_instance(plugin_id).generate(config.get('bullshit_keys', '§ktest§r'))
     except Exception:
         server.logger.warning(f'Failed to get data from plugin "{plugin_id}"')
         return None
