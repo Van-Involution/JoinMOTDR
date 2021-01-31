@@ -117,16 +117,18 @@ def get_request_text(server: ServerInterface, config: dict):
         val_url = val_cfg.get('url', key_name)
         try:
             req_str = requests.get(val_url).text.strip()
-            if (path := val_cfg.get('path', None)) is not None:
+            path = val_cfg.get('path', None)
+            if path is not None:
                 req_json: dict = loads(req_str)
                 path_list = path.split('/')
                 for item in path_list:
                     req_json = req_json.get(item, dict())
                 req_str = str(req_json).strip()
+            rtext_name = RTextList(
+                '[', RText(key_name).h(f'§lAPI§r: §n{val_url}§r').c(RAction.open_url, val_url), '] '
+            )
             text.append(
-                rtext_name := RTextList(
-                    '[', RText(key_name).h(f'§lAPI§r: §n{val_url}§r').c(RAction.open_url, val_url), '] '
-                ),
+                rtext_name,
                 RText(req_str)
                 .h(RTextList(rtext_name.to_plain_text(), RTextTranslation('chat.copy.click')))
                 .c(RAction.copy_to_clipboard, req_str),
@@ -159,9 +161,10 @@ def get_server_list(server: ServerInterface, sub_servers: dict):
         sub_server_list = RTextList()
         for key_id, val_server in sub_servers.items():
             if val_server.get('current', False):
+                name = val_server.get('name', key_id)
                 sub_server_list.append(
                     '[',
-                    RText(name := val_server.get('name', key_id))
+                    RText(name)
                     .h(RText(
                         val_server.get('motd', 'You are now in server §a§l{server_name}§r')
                         .format(server_name=RText(name))
@@ -169,9 +172,10 @@ def get_server_list(server: ServerInterface, sub_servers: dict):
                     '] '
                 )
             else:
+                name = val_server.get('name', key_id)
                 sub_server_list.append(
                     '[',
-                    RText(name := val_server.get('name', key_id))
+                    RText(name)
                     .h(RText(
                         val_server.get('motd', 'Click to join server §b{server_name}§r')
                         .format(server_name=RText(name))
@@ -194,39 +198,45 @@ def format_output(server: ServerInterface, player: str, cfg: dict):
         '\n'
     )
     if cfg.get('show_daycount', False):
-        if (day_count := get_day_count(server)) is not None:
+        day_count = get_day_count(server)
+        if day_count is not None:
             output.append(day_count, '\n')
         else:
             server.logger.warning('Failed to add "daycount" to MOTD')
             error |= 0b1
     if cfg.get('show_seed', False):
-        if (seed := get_seed(server)) is not None:
+        seed = get_seed(server)
+        if seed is not None:
             output.append(seed, '\n')
         else:
             server.logger.warning('Failed to add "seed" to MOTD')
             error |= 0b1
     output.append('\n')
     if cfg.get('show_request_text', False):
-        if (request_text := get_request_text(server, cfg)) is not None:
+        request_text = get_request_text(server, cfg)
+        if request_text is not None:
             output.append(request_text)
         else:
             server.logger.warning('Failed to add "request_text" to MOTD')
             error |= 0b1
     if cfg.get('show_bullshit', False):
-        if (bullshit := get_bullshit(server, cfg)) is not None:
+        bullshit = get_bullshit(server, cfg)
+        if bullshit is not None:
             output.append(bullshit, '\n')
         else:
             server.logger.warning('Failed to add "bullshit" to MOTD')
             error |= 0b1
     output.append('\n')
     if cfg.get('show_server_list', False):
-        if (server_list := get_server_list(server, cfg.get('server_list', None))) is not None:
+        server_list = get_server_list(server, cfg.get('server_list', None))
+        if server_list is not None:
             output.append(server_list, '\n')
         else:
             server.logger.warning('Failed to add "server_list" to MOTD')
             error |= 0b1
     if cfg.get('show_help', True):
-        if (help_msg := get_help_msg(server, cfg.get('help_message', None))) is not None:
+        help_msg = get_help_msg(server, cfg.get('help_message', None))
+        if help_msg is not None:
             output.append(help_msg, '\n')
         else:
             server.logger.warning('Failed to add "help_message" to MOTD')
@@ -248,7 +258,8 @@ def player_is_real(server: ServerInterface, player: str, bots: dict):
 
 
 def on_player_joined(server: ServerInterface, player: str, info: Info):
-    if (config := get_config(server)) is not None:
+    config = get_config(server)
+    if config is not None:
         if player_is_real(server, player, config.get('bots', dict())):
             server.tell(player, format_output(server, player, config))
             server.logger.info(f'Succeeded to send MOTD to {player}')
