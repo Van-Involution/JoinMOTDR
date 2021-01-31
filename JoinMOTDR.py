@@ -3,7 +3,8 @@
 from re import match
 from pathlib import Path
 
-from mcdreforged.api.types import ServerInterface, Info
+from mcdreforged.api.command import Literal
+from mcdreforged.api.types import ServerInterface, Info, PlayerCommandSource
 from mcdreforged.api.rtext import RText, RTextTranslation, RTextList, RAction
 
 PLUGIN_METADATA = {
@@ -69,6 +70,7 @@ server_list:  # Use format as the first object
     motd: Click to join server {server_name}
 '''
 
+DEFAULT_PREFIX = '!!motdr'
 error = 0b0
 
 
@@ -267,3 +269,15 @@ def on_player_joined(server: ServerInterface, player: str, info: Info):
             server.logger.info(f'Sent nothing because player {player} is bot')
     else:
         server.tell(player, f'§cSomething of plugin {NAME} is going wrong, please let admins look up the console!§r')
+
+
+def on_load(server: ServerInterface, prev):
+    def reply_message(src: PlayerCommandSource):
+        try:
+            on_player_joined(server, src.player, Info())
+        except Exception:
+            server.logger.info(f'Cannot send MOTD because command source is not player!')
+    server.register_help_message(DEFAULT_PREFIX, 'Show MOTD of player join')
+    server.register_command(
+        Literal(DEFAULT_PREFIX).runs(reply_message)
+    )
