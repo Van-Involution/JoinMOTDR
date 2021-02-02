@@ -1,0 +1,43 @@
+# Configure file for JoinMOTDR
+# Check https://github.com/Van-Involution/JoinMOTDR for detail
+
+# Basic settings
+title: JoinMOTDR # Title of the whole MOTD
+welcome_message: Welcome, §6{player_name}§r!  # Use {player_name} as format key, support RText
+show_help: true # At the end of the whole MOTD
+help_message: "§7>>> Click for help message <<<§r"  # Support RText
+
+# MCDR plugin requires
+show_daycount: false  # Requires plugin DayCountR (https://github.com/Van-Involution/DayCountR)
+show_seed: false  # Requires plugin SeedR (https://github.com/Van-Involution/SeedR)
+show_bullshit: false  # Requires plugin BullshitGenAPI (https://github.com/Van-Involution/BullshitGenAPI)
+bullshit_keys:  # Support RText
+- §ktest§r
+
+# Other API requires
+bots:  # For fake player detection
+  prefix: #bot_
+  suffix: #_fake
+show_request_text: false  # Requires package Requests (https://pypi.org/project/requests/), use command "pip install requests" to install
+request_api_list:  # Make sure the return is plain text or JSON
+  §d§lPoetry§r:  # Displayed name of the request text
+    url: https://api.muxiaoguo.cn/api/Gushici  # URL of the request API
+    path: data/Poetry  # Path from root object of JSON return, leave a blank for plain text
+  §6§liCiBa§r:
+    url: http://open.iciba.com/dsapi
+    path: content
+  §b§lHitokoto§r:
+    url: https://v1.hitokoto.cn/?encode=text
+    path:
+show_server_list: false  # For sub server of server group
+server_list:  # Use format as the first object
+  survival:  # Server ID, be used in command "/server <server_id>"
+    name: §c§l§nSurvival§r  # Displayed server name
+    motd: You are now in server {server_name}  # Use {server_name} as format key, support RText
+    current: true  # Optional, for server in the same directory
+  creative:
+    name: §6Creative§r
+    motd: Click to join server {server_name}
+  mirror:
+    name: §6Mirror§r
+    motd: Click to join server {server_name}
