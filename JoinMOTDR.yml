@@ -10,7 +10,7 @@ help_message: "§7>>> Click for help message <<<§r"  # Support RText
 # MCDR plugin requires
 show_daycount: false  # Requires plugin DayCountR (https://github.com/Van-Involution/DayCountR)
 show_seed: false  # Requires plugin SeedR (https://github.com/Van-Involution/SeedR)
-show_bullshit: false  # Requires plugin BullshitGenAPI (https://github.com/Van-Involution/BullshitGenAPI)
+show_bullshit: false  # Requires plugin BullshitGen (https://github.com/Van-Involution/BullshitGen)
 bullshit_keys:  # Support RText
 - §ktest§r
 

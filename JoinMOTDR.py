@@ -101,14 +101,14 @@ def get_request_text(server: ServerInterface):
     return text
 
 
-def get_bullshit(server: ServerInterface, plugin_id: str = 'bullshit_generator_api'):
+def get_bullshit(server: ServerInterface, plugin_id: str = 'bullshit_generator'):
     global config
     try:
         return server.get_plugin_instance(plugin_id).generate(
             keys=config.get('bullshit_keys', '§ktest§r'), breakline_chance=0
         )
     except Exception:
-        url = 'https://github.com/Van-Involution/BullshitGenAPI'
+        url = 'https://github.com/Van-Involution/BullshitGen'
         warning = RText(f'§cFailed to get instance from plugin "§l{plugin_id}§r"').c(
             RAction.open_url, url).h(f'§lDocs§r: §n{url}§r')
         server.logger.warning(warning.to_plain_text())
