@@ -9,7 +9,7 @@ from mcdreforged.api.rtext import RText, RTextTranslation, RTextList, RAction
 
 PLUGIN_METADATA = {
     'id': 'join_motd_reforged',
-    'version': '1.0.0',
+    'version': '1.0.1',
     'name': 'JoinMOTDR',
     'description': '',
     'author': [
@@ -163,7 +163,7 @@ def format_output(server: ServerInterface, player: str):
         'help': get_help
     }
     output = RTextList(
-        RText(f'{"=" * 12} {config.get("title", f"{NAME} v{VERSION}")} {"=" * 12}\n')
+        RText(f'{"=" * 12} {config.get("title", f"{NAME}")} {"=" * 12}\n')
         .h(f'§l{NAME} v{VERSION}§r').c(RAction.open_url, LINK),
         f'{config.get("welcome_message", "Welcome, §6{player_name}§r!").format(player_name=player)}\n'
     )

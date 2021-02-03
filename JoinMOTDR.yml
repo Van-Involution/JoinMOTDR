@@ -1,20 +1,20 @@
 # Configure file for JoinMOTDR
 # Check https://github.com/Van-Involution/JoinMOTDR for detail
 
-# Basic settings
+# Basic Settings
 title: JoinMOTDR # Title of the whole MOTD
-welcome_message: Welcome, §6{player_name}§r!  # Use {player_name} as format key, support RText
+welcome_message: Welcome, §6§l{player_name}§r!  # Use {player_name} as format key, support RText
 show_help: true # At the end of the whole MOTD
 help_message: "§7>>> Click for help message <<<§r"  # Support RText
 
-# MCDR plugin requires
+# MCDR Plugin Requires
 show_daycount: false  # Requires plugin DayCountR (https://github.com/Van-Involution/DayCountR)
 show_seed: false  # Requires plugin SeedR (https://github.com/Van-Involution/SeedR)
 show_bullshit: false  # Requires plugin BullshitGen (https://github.com/Van-Involution/BullshitGen)
 bullshit_keys:  # Support RText
 - §ktest§r
 
-# Other API requires
+# Other API Requires
 bots:  # For fake player detection
   prefix: #bot_
   suffix: #_fake
