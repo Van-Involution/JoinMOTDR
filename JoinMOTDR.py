@@ -11,7 +11,7 @@ from mcdreforged.api.rtext import RText, RTextTranslation, RTextList, RAction
 
 PLUGIN_METADATA = {
     'id': 'join_motd_reforged',
-    'version': '1.0.1',
+    'version': '1.0.2',
     'name': 'JoinMOTDR',
     'description': '',
     'author': [
