@@ -2,6 +2,8 @@
 
 from re import match
 
+from ruamel.yaml import load, Loader
+
 from mcdreforged.api.decorator import new_thread
 from mcdreforged.api.command import Literal
 from mcdreforged.api.types import ServerInterface, Info, PlayerCommandSource
@@ -36,17 +38,11 @@ error = 0b0
 
 def get_config(server: ServerInterface):
     try:
-        from yaml import load, FullLoader
+        with open(DEFAULT_CONFIG_PATH, 'r') as cfg:
+            return load(cfg, Loader)
     except Exception:
-        server.logger.warning('Failed to import package PyYAML (https://pypi.org/project/PyYAML), use command "pip install PyYAML" to install!')
+        server.logger.warning(f'Config file disappeared, please download from {LINK}!')
         return None
-    else:
-        try:
-            with open(DEFAULT_CONFIG_PATH, 'r') as cfg:
-                return load(cfg, FullLoader)
-        except Exception:
-            server.logger.warning(f'Config file disappeared, please download from {LINK}!')
-            return None
 
 
 def get_daycount(server: ServerInterface, plugin_id: str = 'day_count_reforged'):
@@ -163,7 +159,7 @@ def format_output(server: ServerInterface, player: str):
         'help': get_help
     }
     output = RTextList(
-        RText(f'{"=" * 12} {config.get("title", f"{NAME}")} {"=" * 12}\n')
+        RText(f'\n{"=" * 12} {config.get("title", f"{NAME}")} {"=" * 12}\n')
         .h(f'§l{NAME} v{VERSION}§r').c(RAction.open_url, LINK),
         f'{config.get("welcome_message", "Welcome, §6{player_name}§r!").format(player_name=player)}\n'
     )
