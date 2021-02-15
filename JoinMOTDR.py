@@ -1,5 +1,3 @@
-# -*- coding: UTF-8 -*-
-
 from re import match
 
 from ruamel.yaml import load, Loader
