@@ -13,11 +13,11 @@ PLUGIN_METADATA = {
     'name': 'JoinMOTDR',
     'description': '',
     'author': [
-        'Van_Involution',  # Reforged to fit MCDR 1.x
+        'Van_Nya',  # Reforged to fit MCDR 1.x
         'Alex3236',  # Source of inspiration
         'Fallen_Breath'  # Another source of inspiration
     ],
-    'link': 'https://github.com/Van-Involution/JoinMOTDR',
+    'link': 'https://github.com/Van-Nya/JoinMOTDR',
     'dependencies': {
         'mcdreforged': '>=1.0.0'
     }
@@ -47,7 +47,7 @@ def get_daycount(server: ServerInterface, plugin_id: str = 'day_count_reforged')
     try:
         return RTextList(server.get_plugin_instance(plugin_id).get_day_count(server), '\n')
     except Exception:
-        url = 'https://github.com/Van-Involution/DayCountR'
+        url = 'https://github.com/Van-Nya/DayCountR'
         warning = RText(f'§cFailed to get instance from plugin "§l{plugin_id}§r"').c(
             RAction.open_url, url).h(f'§lDocs§r: §n{url}§r')
         server.logger.warning(warning.to_plain_text())
@@ -58,7 +58,7 @@ def get_seed(server: ServerInterface, plugin_id: str = 'seed_reforged'):
     try:
         return RTextList(server.get_plugin_instance(plugin_id).get_seed(server), '\n')
     except Exception:
-        url = 'https://github.com/Van-Involution/SeedR'
+        url = 'https://github.com/Van-Nya/SeedR'
         warning = RText(f'§cFailed to get instance from plugin "§l{plugin_id}§r"').c(
             RAction.open_url, url).h(f'§lDocs§r: §n{url}§r')
         server.logger.warning(warning.to_plain_text())
@@ -102,7 +102,7 @@ def get_bullshit(server: ServerInterface, plugin_id: str = 'bullshit_generator')
             keys=config.get('bullshit_keys', '§ktest§r'), breakline_chance=0
         )
     except Exception:
-        url = 'https://github.com/Van-Involution/BullshitGen'
+        url = 'https://github.com/Van-Nya/BullshitGen'
         warning = RText(f'§cFailed to get instance from plugin "§l{plugin_id}§r"').c(
             RAction.open_url, url).h(f'§lDocs§r: §n{url}§r')
         server.logger.warning(warning.to_plain_text())
