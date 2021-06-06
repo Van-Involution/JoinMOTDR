@@ -1,11 +1,12 @@
 from re import match
+from typing import Optional
 
 from ruamel.yaml import load, Loader
 
 from mcdreforged.api.decorator import new_thread
 from mcdreforged.api.command import Literal
 from mcdreforged.api.types import ServerInterface, Info, PlayerCommandSource
-from mcdreforged.api.rtext import RText, RTextTranslation, RTextList, RAction
+from mcdreforged.api.rtext import RTextBase, RText, RTextTranslation, RTextList, RAction
 
 PLUGIN_METADATA = {
     'id': 'join_motd_reforged',
@@ -34,7 +35,7 @@ config = dict()
 error = 0b0
 
 
-def get_config(server: ServerInterface):
+def get_config(server: ServerInterface) -> Optional[dict]:
     try:
         with open(DEFAULT_CONFIG_PATH, 'r') as cfg:
             return load(cfg, Loader)
@@ -43,7 +44,7 @@ def get_config(server: ServerInterface):
         return None
 
 
-def get_daycount(server: ServerInterface, plugin_id: str = 'day_count_reforged'):
+def get_daycount(server: ServerInterface, plugin_id: str = 'day_count_reforged') -> RTextBase:
     try:
         return RTextList(server.get_plugin_instance(plugin_id).get_day_count(server), '\n')
     except Exception:
@@ -54,7 +55,7 @@ def get_daycount(server: ServerInterface, plugin_id: str = 'day_count_reforged')
         return RTextList(warning, '\n')
 
 
-def get_seed(server: ServerInterface, plugin_id: str = 'seed_reforged'):
+def get_seed(server: ServerInterface, plugin_id: str = 'seed_reforged') -> RTextBase:
     try:
         return RTextList(server.get_plugin_instance(plugin_id).get_seed(server), '\n')
     except Exception:
@@ -65,7 +66,7 @@ def get_seed(server: ServerInterface, plugin_id: str = 'seed_reforged'):
         return RTextList(warning, '\n')
 
 
-def get_request_text(server: ServerInterface):
+def get_request_text(server: ServerInterface) -> Optional[RTextBase]:
     global config
     from json import loads
     try:
@@ -95,7 +96,7 @@ def get_request_text(server: ServerInterface):
     return text
 
 
-def get_bullshit(server: ServerInterface, plugin_id: str = 'bullshit_generator'):
+def get_bullshit(server: ServerInterface, plugin_id: str = 'bullshit_generator') -> RTextBase:
     global config
     try:
         return server.get_plugin_instance(plugin_id).generate(
@@ -109,7 +110,7 @@ def get_bullshit(server: ServerInterface, plugin_id: str = 'bullshit_generator')
         return RTextList(warning, '\n')
 
 
-def get_server_list(server: ServerInterface):
+def get_server_list(server: ServerInterface) -> RTextBase:
     global config
     sub_servers = config.get('server_list', dict())
     try:
@@ -130,7 +131,7 @@ def get_server_list(server: ServerInterface):
         return RTextList(warning, '\n')
 
 
-def get_help(server: ServerInterface):
+def get_help(server: ServerInterface) -> RTextBase:
     global config
     try:
         return RText(
@@ -143,7 +144,7 @@ def get_help(server: ServerInterface):
         return RTextList(warning, '\n')
 
 
-def format_output(server: ServerInterface, player: str):
+def format_output(server: ServerInterface, player: str) -> RTextBase:
     global config, error
     error = 0b0
     func_list = {
