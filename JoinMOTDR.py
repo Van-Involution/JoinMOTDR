@@ -46,7 +46,7 @@ def get_config(server: ServerInterface) -> Optional[dict]:
 
 def get_daycount(server: ServerInterface, plugin_id: str = 'day_count_reforged') -> RTextBase:
     try:
-        return RTextList(server.get_plugin_instance(plugin_id).get_day_count(server), '\n')
+        return RTextList(server.get_plugin_instance(plugin_id).get_day_count(), '\n')
     except Exception:
         url = 'https://github.com/Van-Nya/DayCountR'
         warning = RText(f'§cFailed to get instance from plugin "§l{plugin_id}§r"').c(
